@@ -1,97 +1,73 @@
-# 1
+# 2
 
-#include <iostream>
-#include <string>
-#include <chrono>
-#include <thread>
-#include <mutex>
-#include <queue>
-#include <ctime>
-#include <cstdlib>
+import threading
+from  time import sleep
+from collections import deque
+import random
 
+semFree = threading.Semaphore()
+semFull = threading.Semaphore()
 
-#define n_max 10
+mutex = threading.Lock()
 
+queue = deque()
 
-int mtx;
-std::mutex mtx_mutex;
-std::queue <int> q;
-int nr_rand, item;
+def producer() :
+    while 1:
+        item = random.random() * 100
+        print("produce... element %d" % item)
+        sleep(5)
 
-void produce(int item)
-{
-     std::cout <<"introducem in coada numarul "<<item<<" \n";
-     std::this_thread::sleep_for(std::chrono::seconds(5));
-     q.push(item);
+        mutex.acquire()
 
+        if len(queue)< 15:
 
+            semFree.release()
 
-}
+            queue.append(item)
 
-void consume()
-{
-     std::cout <<"extragem din coada \n";
-     std::this_thread::sleep_for(std::chrono::seconds(5));
-     q.pop();
+            semFull.acquire()
+
+        mutex.release()
 
 
-
-}
-
-void producer()
-{
-    while(true)
-    {
-        if(mtx < n_max)
-        {
-            mtx_mutex.lock();
-            srand( time(0));
-            item = rand()%100;
-            produce(item);
-
-            mtx = q.size();
-            std::cout << "n => " << mtx << '\n';
-            mtx_mutex.unlock();
-        }
-    }
-}
-
-
-void consumer()
-{
-    while(true)
-    {
-       if(mtx > 0)
-        {
-            mtx_mutex.lock();
-            consume();
-            mtx = q.size();
-            std::cout << "n => " << mtx << '\n';
-            mtx_mutex.unlock();
-        }
-    }
-}
-
-
-
-int main()
-{
-    mtx = 0;
-    int i;
-    for(i = 0;i<2;i++)
-    {
-        srand( time(0));
-        item = rand()%100;
-        std::cout <<"introducem in coada numarul "<<item<<" \n";
-        q.push(item);
-
-    }
+        #item = produce()
+        #down(semFree)
+        #enqueue(item)
+        #up(semFull)
 
 
 
 
-    std::thread t1(producer);
-    std::thread t2(consumer);
-    t1.join();
-    t2.join();
-}
+def consumer() :
+    while 1:
+        mutex.acquire()
+        if len(queue) > 0 :
+
+            semFull.release()
+
+            queue.popleft()
+
+
+            semFree.acquire()
+        mutex.release()
+        print("consume...")
+        sleep(5)
+
+        #down(semFull)
+        #dequeue()
+        #up(semFree)
+        #consume()
+
+
+queue.append(3)
+queue.append(6)
+queue.append(4)
+
+
+t1 = threading.Thread(target = producer)
+t2 = threading.Thread(target = consumer)
+t1.start()
+t2.start()
+t1.join()
+t2.join()
