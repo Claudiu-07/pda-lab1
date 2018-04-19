@@ -44,7 +44,6 @@ int main(int argc, char *argv[]){
 			MPI_Send(&procid, 1, MPI_INT, MASTER, 1, MPI_COMM_WORLD);
 		}
 		
-	
 	MPI_Finalize();
 	return 0;
 }
