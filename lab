@@ -7,10 +7,8 @@
 #include <chrono>
 
 #define MASTER 0
-
+#define m 10
 int main(int argc, char *argv[]){
-	
-	int m,n,v[21];
 	
 	MPI_Init(&argc,&argv);
 	
@@ -23,6 +21,7 @@ int main(int argc, char *argv[]){
 	MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
 	MPI_Comm_rank(MPI_COMM_WORLD, &procid);
 	//MPI_Get_processor_name(hostname, &len);
+	if(procid < m){
 		if(procid == MASTER)
 		{
 			srand( time(0));
@@ -30,9 +29,8 @@ int main(int argc, char *argv[]){
 			int max_proc=0;
 			for(int j=1;j<m;j++)
 			{	
-				MPI_Send(&procid, 1, MPI_INT, MASTER, 1, MPI_COMM_WORLD); // j este procid
-				proc_curent = procid;
-				MPI_Recv(&message, 1, MPI_INT, procid, 1, MPI_COMM_WORLD, &status);
+				proc_curent = procid; // sau j
+				MPI_Recv(&message, 1, MPI_INT, j, 1, MPI_COMM_WORLD, &status);
 				
 				if(message >= max && max_proc < proc_curent)
 				{
@@ -44,10 +42,9 @@ int main(int argc, char *argv[]){
 		}
 		else
 		{
-			MPI_Recv(&message, 1, MPI_INT, procid, 1, MPI_COMM_WORLD, &status);
 			srand( time(0));
         		message = rand()%100;
-			MPI_Send(&procid, 1, MPI_INT, MASTER, 1, MPI_COMM_WORLD); // trebe sa fie 0? adica master?
+			MPI_Send(&message, 1, MPI_INT, MASTER, 1, MPI_COMM_WORLD); // trebe sa fie 0? adica master?
 		}
 		
 		if(procid == MASTER)
@@ -55,15 +52,15 @@ int main(int argc, char *argv[]){
 			max_final = max;
 			proc_leader = max_proc;
 			for(int j=1;j<m;j++)
-				MPI_Send(&procid, 1, MPI_INT, MASTER, 1, MPI_COMM_WORLD); // j este procid
-				MPI_Send(&procid, 1, MPI_INT, MASTER, 1, MPI_COMM_WORLD); // j este procid
+				MPI_Send(&max_final, 1, MPI_INT, j, 1, MPI_COMM_WORLD); // j este procid
+				MPI_Send(&proc_leader, 1, MPI_INT, j, 1, MPI_COMM_WORLD); // j este procid
 		}
 		else{
-			MPI_Recv(&max_final, 1, MPI_INT, procid, 1, MPI_COMM_WORLD, &status);
-			MPI_Recv(&proc_leader, 1, MPI_INT, procid, 1, MPI_COMM_WORLD, &status);
+			MPI_Recv(&max_final, 1, MPI_INT, MASTER, 1, MPI_COMM_WORLD, &status);
+			MPI_Recv(&proc_leader, 1, MPI_INT, MASTER, 1, MPI_COMM_WORLD, &status);
 		}
 		
-	
+	}
 	MPI_Finalize();
 	return 0;
 }
