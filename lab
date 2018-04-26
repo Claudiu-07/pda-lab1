@@ -4,10 +4,10 @@
 #include"mpi.h"
 
 #define MASTER 0
-
+#define m 10
 int main(int argc, char *argv[]){
 	
-	int m,n,v[21];
+	int n,v[21];
 	
 	MPI_Init(&argc,&argv);
 	
@@ -22,7 +22,6 @@ int main(int argc, char *argv[]){
 	if(procid < m){
 		if(procid == MASTER)
 		{
-			cin>>m;
 			cin>n;
 			for(int i=0;i<n;i++)
 				cin>>v[i];
