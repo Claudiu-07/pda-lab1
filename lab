@@ -37,8 +37,7 @@ int main(int argc, char *argv[]){
 				max=message;
 				max_proc = proc_curent;
 				}
-			}
-			
+			}	
 		}
 		else
 		{
